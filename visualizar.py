@@ -5,7 +5,7 @@ import os
 arquivo = './images/Imagem.ppm'
 
 if os.path.exists(arquivo):
-    print("Arquivo encontrado! Abrindo imagem...")
+    print("Arquivo encontrado! Visualização com ")
     
     # Abrir e mostrar a imagem
     img = Image.open(arquivo)
@@ -17,8 +17,7 @@ if os.path.exists(arquivo):
     
     # Opcional: Salvar como PNG
     img.save('./images/Imagem.png')
-    print("Imagem também salva como PNG!")
+    print("Imagem salva!")
     
 else:
     print("Arquivo Imagem.ppm não encontrado!")
-    print("Certifique-se de que executou o programa C++ primeiro.")
