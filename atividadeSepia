@@ -1,0 +1,131 @@
+#include <iostream>
+#include <thread>
+#include <chrono>
+#include <fstream>
+#include <vector>
+
+struct Pixel {
+    int r, g, b;
+    
+    // Construtor
+    Pixel(int red = 0, int green = 0, int blue = 0) : r(red), g(green), b(blue) {}
+};
+
+// Aplicar filtro Sepia em uma região da imagem
+void applySepiaRegion(std::vector<std::vector<Pixel>>& image, int startY, int endY, int threadId) {
+    std::cout << "Thread " << threadId << " processando linhas " << startY << " ate " << endY << std::endl;
+    
+    for (int y = startY; y < endY; y++) {
+        for (int x = 0; x < image[y].size(); x++) {
+            Pixel& pixel = image[y][x];
+            
+            // Salvar valores originais
+            int originalR = pixel.r;
+            int originalG = pixel.g;
+            int originalB = pixel.b;
+            
+            // Aplicar fórmula do filtro Sepia
+            int sepiaR = (int)(0.393 * originalR + 0.769 * originalG + 0.189 * originalB);
+            int sepiaG = (int)(0.349 * originalR + 0.686 * originalG + 0.168 * originalB);
+            int sepiaB = (int)(0.272 * originalR + 0.534 * originalG + 0.131 * originalB);
+            
+            // Limitar valores ao range 0-255
+            pixel.r = (sepiaR > 255) ? 255 : sepiaR;
+            pixel.g = (sepiaG > 255) ? 255 : sepiaG;
+            pixel.b = (sepiaB > 255) ? 255 : sepiaB;
+        }
+    }
+    
+    std::cout << "Thread " << threadId << " TERMINOU!" << std::endl;
+}
+
+// Função para salvar imagem em formato PPM
+void saveImagePPM(const std::vector<std::vector<Pixel>>& image, const std::string& filename) {
+    std::ofstream file(filename);
+    
+    if (file.is_open()) {
+        int width = image[0].size();
+        int height = image.size();
+        
+        // Header PPM
+        file << "P3" << std::endl;
+        file << width << " " << height << std::endl;
+        file << "255" << std::endl;
+        
+        // Pixels
+        for (int y = 0; y < height; y++) {
+            for (int x = 0; x < width; x++) {
+                file << image[y][x].r << " " << image[y][x].g << " " << image[y][x].b << " ";
+            }
+            file << std::endl;
+        }
+        
+        file.close();
+        std::cout << "Arquivo salvo: " << filename << std::endl;
+    } else {
+        std::cout << "Erro ao criar arquivo: " << filename << std::endl;
+    }
+}
+
+int main() {
+    const int WIDTH = 400;
+    const int HEIGHT = 300;
+    
+    std::cout << "=== FILTRO SEPIA COM MULTITHREAD ===" << std::endl;
+    std::cout << "Criando imagem " << WIDTH << "x" << HEIGHT << " pixels..." << std::endl;
+    
+    // Criar matriz da imagem
+    std::vector<std::vector<Pixel>> image(HEIGHT, std::vector<Pixel>(WIDTH));
+    
+    // Preencher imagem com padrão colorido
+    std::cout << "Gerando imagem colorida..." << std::endl;
+    for (int y = 0; y < HEIGHT; y++) {
+        for (int x = 0; x < WIDTH; x++) {
+            // Criar gradiente colorido
+            int r = (x * 255) / WIDTH;           // Vermelho varia horizontalmente
+            int g = (y * 255) / HEIGHT;          // Verde varia verticalmente  
+            int b = ((x + y) * 255) / (WIDTH + HEIGHT); // Azul varia diagonalmente
+            
+            image[y][x] = Pixel(r, g, b);
+        }
+    }
+    
+    // Salvar imagem original
+    std::cout << "Salvando imagem original..." << std::endl;
+    saveImagePPM(image, "original.ppm");
+    
+    // Aplicar filtro Sepia usando 2 threads
+    std::cout << std::endl << "Aplicando filtro Sepia com 2 threads..." << std::endl;
+    
+    const int midY = HEIGHT / 2;
+    
+    auto start = std::chrono::high_resolution_clock::now();
+    
+    // Criar threads
+    std::thread t1(applySepiaRegion, std::ref(image), 0, midY, 1);
+    std::thread t2(applySepiaRegion, std::ref(image), midY, HEIGHT, 2);
+    
+    // Aguardar threads terminarem
+    t1.join();
+    t2.join();
+    
+    auto end = std::chrono::high_resolution_clock::now();
+    auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
+    
+    // Salvar imagem com filtro Sepia
+    std::cout << std::endl << "Salvando imagem com filtro Sepia..." << std::endl;
+    saveImagePPM(image, "sepia.ppm");
+    
+    // Mostrar resultados
+    std::cout << std::endl << "=== RESULTADO ===" << std::endl;
+    std::cout << "Filtro Sepia aplicado em " << duration.count() << "ms!" << std::endl;
+    std::cout << "Pixels processados: " << (WIDTH * HEIGHT) << std::endl;
+    std::cout << std::endl << "Arquivos criados:" << std::endl;
+    std::cout << "- original.ppm (imagem colorida original)" << std::endl;
+    std::cout << "- sepia.ppm (imagem com filtro sepia)" << std::endl;
+    std::cout << std::endl << "Para visualizar:" << std::endl;
+    std::cout << "1. Abra com GIMP (gratuito)" << std::endl;
+    std::cout << "2. Ou converta online: convertio.co/ppm-png" << std::endl;
+    
+    return 0;
+}
