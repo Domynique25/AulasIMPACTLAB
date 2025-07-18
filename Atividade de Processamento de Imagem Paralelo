@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MY PROJECT IMAGE LAB 2024 - Impact Lab 2025</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f0f0f0;
+            margin: 0;
+            padding: 20px;
+        }
+        
+        .main-container {
+            background-color: #f0f0f0;
+            width: 1200px;
+            height: 700px;
+            position: relative;
+            border: 2px solid #ccc;
+            margin: 0 auto;
+        }
+        
+        .panel-label {
+            position: absolute;
+            font-weight: bold;
+            font-size: 12px;
+            color: #333;
+        }
+        
+        .picture-box {
+            position: absolute;
+            border: 1px solid #000;
+            background-color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+        
+        .picture-box img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+        
+        .btn {
+            position: absolute;
+            padding: 5px 10px;
+            font-size: 11px;
+            border: 1px solid #ccc;
+            background-color: #e1e1e1;
+            cursor: pointer;
+            font-family: inherit;
+        }
+        
+        .btn:hover {
+            background-color: #d4d4d4;
+        }
+        
+        .btn-green {
+            background-color: #90EE90;
+        }
+        
+        .btn-blue {
+            background-color: #ADD8E6;
+        }
+        
+        .status-label {
+            position: absolute;
+            font-size: 11px;
+            color: #666;
+        }
+        
+        .timer-label {
+            position: absolute;
+            font-size: 12px;
+            font-weight: bold;
+            color: #0066cc;
+        }
+        
+        .demo-text {
+            position: absolute;
+            top: 10px;
+            right: 20px;
+            background: rgba(255,255,255,0.9);
+            padding: 10px;
+            border-radius: 5px;
+            font-size: 12px;
+            color: #666;
+            max-width: 200px;
+        }
+        
+        .filter-demo {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            color: #888;
+        }
+        
+        .sepia-filter {
+            filter: sepia(100%) saturate(200%) hue-rotate(15deg);
+        }
+        
+        .bw-filter {
+            filter: grayscale(100%);
+        }
+        
+        .split-horizontal {
+            position: relative;
+            width: 100%;
+            height: 100%;
+        }
+        
+        .split-vertical {
+            position: relative;
+            width: 100%;
+            height: 100%;
+        }
+        
+        .top-half, .bottom-half {
+            position: absolute;
+            width: 100%;
+            height: 50%;
+        }
+        
+        .bottom-half {
+            top: 50%;
+        }
+        
+        .left-half, .right-half {
+            position: absolute;
+            height: 100%;
+            width: 50%;
+        }
+        
+        .right-half {
+            left: 50%;
+        }
+        
+        .quadrant {
+            position: absolute;
+            width: 50%;
+            height: 50%;
+        }
+        
+        .quad-tr { top: 0; right: 0; }
+        .quad-tl { top: 0; left: 0; }
+        .quad-bl { bottom: 0; left: 0; }
+        .quad-br { bottom: 0; right: 0; }
+    </style>
+</head>
+<body>
+    <div class="main-container">
+        <!-- Panel Labels -->
+        <div class="panel-label" style="left: 20px; top: 20px;">Original</div>
+        <div class="panel-label" style="left: 420px; top: 20px;">Copy</div>
+        <div class="panel-label" style="left: 820px; top: 20px;">Output</div>
+        
+        <!-- Picture Boxes -->
+        <div class="picture-box" style="left: 20px; top: 40px; width: 350px; height: 280px;" id="pbox-original">
+            <img src="https://placehold.co/300x200/4CAF50/white?text=Original+Image" alt="Original Image" id="original-img">
+        </div>
+        
+        <div class="picture-box" style="left: 420px; top: 40px; width: 350px; height: 280px;" id="pbox-copy">
+            <div class="filter-demo" id="copy-content">Processed image will appear here</div>
+        </div>
+        
+        <div class="picture-box" style="left: 820px; top: 40px; width: 350px; height: 280px;" id="pbox-output">
+            <div class="filter-demo" id="output-content">Final output will appear here</div>
+        </div>
+        
+        <!-- Control Buttons - First Row -->
+        <button class="btn" style="left: 20px; top: 350px; width: 100px; height: 30px;" onclick="openImage()">Open Image</button>
+        <button class="btn" style="left: 130px; top: 350px; width: 100px; height: 30px;" onclick="copyImage()">Copy</button>
+        <button class="btn" style="left: 240px; top: 350px; width: 100px; height: 30px;" onclick="clearAll()">Clear All</button>
+        
+        <!-- Control Buttons - Second Row -->
+        <button class="btn" style="left: 20px; top: 390px; width: 120px; height: 30px;" onclick="applySepiaTop()">Sepia Top Half</button>
+        <button class="btn" style="left: 150px; top: 390px; width: 120px; height: 30px;" onclick="applySepiaBottom()">Sepia Bottom Half</button>
+        <button class="btn" style="left: 280px; top: 390px; width: 120px; height: 30px;" onclick="applyBWLeft()">B&W Left Half</button>
+        <button class="btn" style="left: 410px; top: 390px; width: 120px; height: 30px;" onclick="applyBWRight()">B&W Right Half</button>
+        
+        <!-- Control Buttons - Third Row -->
+        <button class="btn btn-green" style="left: 20px; top: 430px; width: 150px; height: 30px;" onclick="applyParallel2()">Parallel (2 Threads)</button>
+        <button class="btn btn-blue" style="left: 180px; top: 430px; width: 150px; height: 30px;" onclick="applyParallel4()">Parallel (4 Threads)</button>
+        <button class="btn" style="left: 340px; top: 430px; width: 120px; height: 30px;" onclick="applyFullSepia()">Full Sepia</button>
+        <button class="btn" style="left: 470px; top: 430px; width: 120px; height: 30px;" onclick="applyFullBW()">Full B&W</button>
+        
+        <!-- Status Labels -->
+        <div class="timer-label" style="left: 20px; top: 480px; width: 400px;">Processing Time: 0 ms</div>
+        <div class="status-label" style="left: 20px; top: 505px; width: 600px;">Ready - Impact Lab 2025</div>
+        
+        <!-- Demo Info -->
+        <div class="demo-text">
+            <strong>Simulação da Interface C++/CLI</strong><br>
+            Esta é uma representação visual de como a aplicação funcionaria quando compilada e executada.
+        </div>
+    </div>
+
+    <script>
+        let processingTime = 0;
+        let imageLoaded = false;
+        
+        function updateTimer(time) {
+            document.querySelector('.timer-label').textContent = `Processing Time: ${time} ms`;
+        }
+        
+        function updateStatus(status) {
+            document.querySelector('.status-label').textContent = status;
+        }
+        
+        function openImage() {
+            // Usa sua imagem da maçã carregada
+            document.getElementById('original-img').src = "https://cdn.abacus.ai/images/18449987-1389-42bd-9bec-9bb37cde9f9d.png";
+            document.getElementById('original-img').style.objectFit = "contain";
+            document.getElementById('original-img').style.width = "100%";
+            document.getElementById('original-img').style.height = "100%";
+            imageLoaded = true;
+            updateStatus("Image loaded: your_apple_image.png");
+        }
+        
+        function copyImage() {
+            if (!imageLoaded) {
+                alert("Please load an image first!");
+                return;
+            }
+            document.getElementById('copy-content').innerHTML = '<img src="https://cdn.abacus.ai/images/18449987-1389-42bd-9bec-9bb37cde9f9d.png" style="max-width:100%; max-height:100%; object-fit: contain;">';
+            updateStatus("Image copied to center panel");
+        }
+        
+        function applySepiaTop() {
+            if (!imageLoaded) return;
+            
+            const startTime = Date.now();
+            setTimeout(() => {
+                const time = Date.now() - startTime + Math.random() * 50 + 25;
+                document.getElementById('copy-content').innerHTML = `
+                    <div class="split-horizontal">
+                        <div class="top-half sepia-filter" style="background: url('https://cdn.abacus.ai/images/18449987-1389-42bd-9bec-9bb37cde9f9d.png') center/contain no-repeat; background-size: contain;"></div>
+                        <div class="bottom-half" style="background: url('https://cdn.abacus.ai/images/18449987-1389-42bd-9bec-9bb37cde9f9d.png') center/contain no-repeat; background-size: contain;"></div>
+                    </div>
+                `;
+                updateTimer(Math.round(time));
+                updateStatus("Sepia filter applied to top half");
+            }, 50);
+        }
+        
+        function applySepiaBottom() {
+            if (!imageLoaded) return;
+            
+            const startTime = Date.now();
+            setTimeout(() => {
+                const time = Date.now() - startTime + Math.random() * 50 + 25;
+                document.getElementById('output-content').innerHTML = `
+                    <div class="split-horizontal">
+                        <div class="top-half" style="background: url('https://cdn.abacus.ai/images/18449987-1389-42bd-9bec-9bb37cde9f9d.png') center/contain no-repeat; background-size: contain;"></div>
+                        <div class="bottom-half sepia-filter" style="background: url('https://cdn.abacus.ai/images/18449987-1389-42bd-9bec-9bb37cde9f9d.png') center/contain no-repeat; background-size: contain;"></div>
+                    </div>
+                `;
+                updateTimer(Math.round(time));
+                updateStatus("Sepia filter applied to bottom half");
+            }, 50);
+        }
+        
+        function applyBWLeft() {
+            if (!imageLoaded) return;
+            
+            const startTime = Date.now();
+            setTimeout(() => {
+                const time = Date.now() - startTime + Math.random() * 50 + 25;
+                document.getElementById('copy-content').innerHTML = `
+                    <div class="split-vertical">
+                        <div class="left-half bw-filter" style="background: url('https://cdn.abacus.ai/images/18449987-1389-42bd-9bec-9bb37cde9f9d.png') center/contain no-repeat; background-size: contain;"></div>
+                        <div class="right-half" style="background: url('https://cdn.abacus.ai/images/18449987-1389-42bd-9bec-9bb37cde9f9d.png') center/contain no-repeat; background-size: contain;"></div>
+                    </div>
+                `;
+                updateTimer(Math.round(time));
+                updateStatus("B&W filter applied to left half");
+            }, 50);
+        }
+        
+        function applyBWRight() {
+            if (!imageLoaded) return;
+            
+            const startTime = Date.now();
+            setTimeout(() => {
+                const time = Date.now() - startTime + Math.random() * 50 + 25;
+                document.getElementById('output-content').innerHTML = `
+                    <div class="split-vertical">
+                        <div class="left-half" style="background: url('https://cdn.abacus.ai/images/18449987-1389-42bd-9bec-9bb37cde9f9d.png') center/contain no-repeat; background-size: contain;"></div>
+                        <div class="right-half bw-filter" style="background: url('https://cdn.abacus.ai/images/18449987-1389-42bd-9bec-9bb37cde9f9d.png') center/contain no-repeat; background-size: contain;"></div>
+                    </div>
+                `;
+                updateTimer(Math.round(time));
+                updateStatus("B&W filter applied to right half");
+            }, 50);
+        }
+        
+        function applyParallel2() {
+            if (!imageLoaded) return;
+            
+            const startTime = Date.now();
+            setTimeout(() => {
+                const time = Date.now() - startTime + Math.random() * 30 + 15;
+                document.getElementById('output-content').innerHTML = `
+                    <div class="split-horizontal">
+                        <div class="top-half sepia-filter" style="background: url('https://cdn.abacus.ai/images/18449987-1389-42bd-9bec-9bb37cde9f9d.png') center/contain no-repeat; background-size: contain;"></div>
+                        <div class="bottom-half bw-filter" style="background: url('https://cdn.abacus.ai/images/18449987-1389-42bd-9bec-9bb37cde9f9d.png') center/contain no-repeat; background-size: contain;"></div>
+                    </div>
+                `;
+                updateTimer(Math.round(time));
+                updateStatus("Parallel processing completed - 2 threads (Sepia top + B&W bottom)");
+            }, 30);
+        }
+        
+        function applyParallel4() {
+            if (!imageLoaded) return;
+            
+            const startTime = Date.now();
+            setTimeout(() => {
+                const time = Date.now() - startTime + Math.random() * 20 + 10;
+                document.getElementById('output-content').innerHTML = `
+                    <div style="position: relative; width: 100%; height: 100%;">
+                        <div class="quadrant quad-tl sepia-filter" style="background: url('https://cdn.abacus.ai/images/18449987-1389-42bd-9bec-9bb37cde9f9d.png') center/contain no-repeat; background-size: 200% 200%; background-position: 0% 0%;"></div>
+                        <div class="quadrant quad-tr bw-filter" style="background: url('https://cdn.abacus.ai/images/18449987-1389-42bd-9bec-9bb37cde9f9d.png') center/contain no-repeat; background-size: 200% 200%; background-position: 100% 0%;"></div>
+                        <div class="quadrant quad-bl bw-filter" style="background: url('https://cdn.abacus.ai/images/18449987-1389-42bd-9bec-9bb37cde9f9d.png') center/contain no-repeat; background-size: 200% 200%; background-position: 0% 100%;"></div>
+                        <div class="quadrant quad-br sepia-filter" style="background: url('https://cdn.abacus.ai/images/18449987-1389-42bd-9bec-9bb37cde9f9d.png') center/contain no-repeat; background-size: 200% 200%; background-position: 100% 100%;"></div>
+                    </div>
+                `;
+                updateTimer(Math.round(time));
+                updateStatus("Multi-thread processing completed - 4 threads (Quadrants)");
+            }, 20);
+        }
+        
+        function applyFullSepia() {
+            if (!imageLoaded) return;
+            
+            const startTime = Date.now();
+            setTimeout(() => {
+                const time = Date.now() - startTime + Math.random() * 80 + 40;
+                document.getElementById('output-content').innerHTML = `
+                    <img src="https://cdn.abacus.ai/images/18449987-1389-42bd-9bec-9bb37cde9f9d.png" class="sepia-filter" style="max-width:100%; max-height:100%; object-fit: contain;">
+                `;
+                updateTimer(Math.round(time));
+                updateStatus("Full sepia filter applied");
+            }, 80);
+        }
+        
+        function applyFullBW() {
+            if (!imageLoaded) return;
+            
+            const startTime = Date.now();
+            setTimeout(() => {
+                const time = Date.now() - startTime + Math.random() * 80 + 40;
+                document.getElementById('output-content').innerHTML = `
+                    <img src="https://cdn.abacus.ai/images/18449987-1389-42bd-9bec-9bb37cde9f9d.png" class="bw-filter" style="max-width:100%; max-height:100%; object-fit: contain;">
+                `;
+                updateTimer(Math.round(time));
+                updateStatus("Full B&W filter applied");
+            }, 80);
+        }
+        
+        function clearAll() {
+            document.getElementById('original-img').src = "https://placehold.co/300x200/4CAF50/white?text=Click+Open+Image";
+            document.getElementById('copy-content').innerHTML = "Processed image will appear here";
+            document.getElementById('output-content').innerHTML = "Final output will appear here";
+            imageLoaded = false;
+            updateTimer(0);
+            updateStatus("All images cleared - Ready");
+        }
+    </script>
+</body>
+</html>
